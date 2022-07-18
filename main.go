@@ -7,7 +7,6 @@ import (
 	"goformatv2/internal/cache"
 	"goformatv2/internal/database"
 	"goformatv2/internal/entry"
-	"os"
 
 	_ "goformatv2/docs"
 
@@ -28,20 +27,18 @@ func init() {
 	helper.SetFormatter(&logrus.JSONFormatter{})
 
 	// 檢查 DB 機器服務
-	db := database.NewDBConnection()
-	db.DBPing()
+	database.DBPing()
 
 	// 自動建置 DB + Table
 	if helper.IsLocal() {
-		db.CheckTable()
+		database.CheckTable()
 	}
 
 	// 檢查 Redis 機器服務
-	redis := cache.RedisIns()
-	_ = redis.Ping()
+	_ = cache.Ping()
 
 	// 設定程式碼 timezone
-	os.Setenv("TZ", "America/Puerto_Rico")
+	// os.Setenv("TZ", "America/Puerto_Rico")
 }
 
 func main() {

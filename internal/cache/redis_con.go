@@ -7,51 +7,13 @@ import (
 	"goformatv2/app/global"
 	"goformatv2/app/global/helper"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 )
 
-// IRedis interface
-type IRedis interface {
-	Ping() error
-	Set(key, value string, exp time.Duration) error
-	Get(key string) (string, error)
-	Delete(key string) error
-	Exists(key string) (bool, error)
-	Expire(key string, expire time.Duration) error
-	HSet(key string, field ...string) error
-	HMSet(key string, field map[string]interface{}) error
-	HGet(key, field string) (string, error)
-	HDel(key, field string) (int64, error)
-	Publish(channel string, data []byte) error
-	Subscribe(channel string) *redis.PubSub
-	LPush(channel string, data []byte) error
-	RPush(channel string, data []byte) error
-	LPop(channel string) *redis.StringCmd
-	LPos(key, value string) *redis.IntCmd
-	LRange(key string, start, stop int64) *redis.StringSliceCmd
-	LRem(key string, count int64, value interface{}) *redis.IntCmd
-	BRPop(channel string, exp time.Duration) *redis.StringSliceCmd
-}
-
-// Redis 存取值
-type Redis struct{}
-
-var redisSingleton *Redis
-var redisOnce sync.Once
-
 // redisPool 存放redis連線池的全域變數
 var redisPool *redis.Client
-
-// RedisIns 獲得單例對象
-func RedisIns() IRedis {
-	redisOnce.Do(func() {
-		redisSingleton = &Redis{}
-	})
-	return redisSingleton
-}
 
 func PrintRedisPool(stats *redis.PoolStats) {
 	fmt.Printf("Hits=%d Misses=%d Timeouts=%d TotalConns=%d IdleConns=%d StaleConns=%d\n",
@@ -59,7 +21,7 @@ func PrintRedisPool(stats *redis.PoolStats) {
 }
 
 // RedisPoolConnect 回傳連線池的 Redis 連線
-func (r *Redis) redisPoolConnect() *redis.Client {
+func redisPoolConnect() *redis.Client {
 
 	if redisPool != nil {
 		return redisPool
@@ -112,8 +74,8 @@ func (r *Redis) redisPoolConnect() *redis.Client {
 }
 
 // 連線檢查
-func (r *Redis) Ping() error {
-	pool := r.redisPoolConnect()
+func Ping() error {
+	pool := redisPoolConnect()
 	_, err := pool.Ping(context.TODO()).Result()
 	if err != nil {
 		pool.Close()
@@ -123,8 +85,8 @@ func (r *Redis) Ping() error {
 }
 
 // Set 存值
-func (r *Redis) Set(key, value string, exp time.Duration) error {
-	pool := r.redisPoolConnect()
+func Set(key, value string, exp time.Duration) error {
+	pool := redisPoolConnect()
 	if err := pool.Set(context.TODO(), key, value, exp).Err(); err != nil {
 		return err
 	}
@@ -132,8 +94,8 @@ func (r *Redis) Set(key, value string, exp time.Duration) error {
 }
 
 // Get 取出指定的值
-func (r *Redis) Get(key string) (string, error) {
-	pool := r.redisPoolConnect()
+func Get(key string) (string, error) {
+	pool := redisPoolConnect()
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
 
@@ -146,8 +108,8 @@ func (r *Redis) Get(key string) (string, error) {
 }
 
 // Delete 刪除
-func (r *Redis) Delete(key string) error {
-	pool := r.redisPoolConnect()
+func Delete(key string) error {
+	pool := redisPoolConnect()
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
 
@@ -159,8 +121,8 @@ func (r *Redis) Delete(key string) error {
 }
 
 // Exists Key 是否存在
-func (r *Redis) Exists(key string) (bool, error) {
-	pool := r.redisPoolConnect()
+func Exists(key string) (bool, error) {
+	pool := redisPoolConnect()
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
 
@@ -176,8 +138,8 @@ func (r *Redis) Exists(key string) (bool, error) {
 }
 
 // Expire Key 設定到期時間
-func (r *Redis) Expire(key string, expire time.Duration) error {
-	pool := r.redisPoolConnect()
+func Expire(key string, expire time.Duration) error {
+	pool := redisPoolConnect()
 
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
@@ -189,8 +151,8 @@ func (r *Redis) Expire(key string, expire time.Duration) error {
 }
 
 // HSet 存 hash 值
-func (r *Redis) HSet(key string, field ...string) error {
-	pool := r.redisPoolConnect()
+func HSet(key string, field ...string) error {
+	pool := redisPoolConnect()
 
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
@@ -203,8 +165,8 @@ func (r *Redis) HSet(key string, field ...string) error {
 }
 
 // HMSet 存 muti hash 值
-func (r *Redis) HMSet(key string, field map[string]interface{}) error {
-	pool := r.redisPoolConnect()
+func HMSet(key string, field map[string]interface{}) error {
+	pool := redisPoolConnect()
 
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
@@ -217,8 +179,8 @@ func (r *Redis) HMSet(key string, field map[string]interface{}) error {
 }
 
 // HGet 取值
-func (r *Redis) HGet(key, field string) (string, error) {
-	pool := r.redisPoolConnect()
+func HGet(key, field string) (string, error) {
+	pool := redisPoolConnect()
 
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
@@ -236,8 +198,8 @@ func (r *Redis) HGet(key, field string) (string, error) {
 }
 
 // HDel 删除 hash 字段
-func (r *Redis) HDel(key, field string) (int64, error) {
-	pool := r.redisPoolConnect()
+func HDel(key, field string) (int64, error) {
+	pool := redisPoolConnect()
 
 	// 切換 0
 	pool.Do(context.TODO(), "select", 0)
@@ -250,8 +212,8 @@ func (r *Redis) HDel(key, field string) (int64, error) {
 }
 
 // Publish Redis Pub 事件，for queue 推送使用
-func (r *Redis) Publish(channel string, data []byte) error {
-	pool := r.redisPoolConnect()
+func Publish(channel string, data []byte) error {
+	pool := redisPoolConnect()
 
 	_, err := pool.Publish(context.Background(), channel, data).Result()
 	if err != nil {
@@ -261,15 +223,15 @@ func (r *Redis) Publish(channel string, data []byte) error {
 }
 
 // Subscribe Redis sub 事件，for queue 接收使用
-func (r *Redis) Subscribe(channel string) *redis.PubSub {
-	pool := r.redisPoolConnect()
+func Subscribe(channel string) *redis.PubSub {
+	pool := redisPoolConnect()
 	subscriber := pool.Subscribe(context.Background(), channel)
 	return subscriber
 }
 
 // LPush Redis Pub 事件，for queue 推送使用(可存留在 queue 中)
-func (r *Redis) LPush(channel string, data []byte) error {
-	pool := r.redisPoolConnect()
+func LPush(channel string, data []byte) error {
+	pool := redisPoolConnect()
 
 	_, err := pool.LPush(context.Background(), channel, data).Result()
 	if err != nil {
@@ -280,8 +242,8 @@ func (r *Redis) LPush(channel string, data []byte) error {
 }
 
 // RPush
-func (r *Redis) RPush(channel string, data []byte) error {
-	pool := r.redisPoolConnect()
+func RPush(channel string, data []byte) error {
+	pool := redisPoolConnect()
 
 	_, err := pool.RPush(context.Background(), channel, data).Result()
 	if err != nil {
@@ -292,15 +254,15 @@ func (r *Redis) RPush(channel string, data []byte) error {
 }
 
 // LPop
-func (r *Redis) LPop(channel string) *redis.StringCmd {
-	pool := r.redisPoolConnect()
+func LPop(channel string) *redis.StringCmd {
+	pool := redisPoolConnect()
 	lpop := pool.LPop(context.Background(), channel)
 	return lpop
 }
 
 // LPos 取值
-func (r *Redis) LPos(key, value string) *redis.IntCmd {
-	pool := r.redisPoolConnect()
+func LPos(key, value string) *redis.IntCmd {
+	pool := redisPoolConnect()
 	args := redis.LPosArgs{}
 
 	lpos := pool.LPos(context.Background(), key, value, args)
@@ -309,22 +271,22 @@ func (r *Redis) LPos(key, value string) *redis.IntCmd {
 }
 
 // LRange 取值
-func (r *Redis) LRange(key string, start, stop int64) *redis.StringSliceCmd {
-	pool := r.redisPoolConnect()
+func LRange(key string, start, stop int64) *redis.StringSliceCmd {
+	pool := redisPoolConnect()
 	lrange := pool.LRange(context.Background(), key, start, stop)
 	return lrange
 }
 
 // LRem 刪除指定 value
-func (r *Redis) LRem(key string, count int64, value interface{}) *redis.IntCmd {
-	pool := r.redisPoolConnect()
+func LRem(key string, count int64, value interface{}) *redis.IntCmd {
+	pool := redisPoolConnect()
 	lrem := pool.LRem(context.Background(), key, count, value)
 	return lrem
 }
 
 // BRPop Redis sub 事件，for queue 接收使用(監聽有內容就取用，無事件時間到自動回收)
-func (r *Redis) BRPop(channel string, exp time.Duration) *redis.StringSliceCmd {
-	pool := r.redisPoolConnect()
+func BRPop(channel string, exp time.Duration) *redis.StringSliceCmd {
+	pool := redisPoolConnect()
 	subscriber := pool.BRPop(context.Background(), exp, channel)
 	return subscriber
 }

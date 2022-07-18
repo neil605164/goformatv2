@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"gorm.io/gorm/logger"
+	"gorm.io/plugin/dbresolver"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -24,125 +24,76 @@ type dbCon struct {
 	Database string `json:"database"`
 }
 
-// masterPool 存放 db Master 連線池的全域變數
-var masterPool *gorm.DB
+var DB *gorm.DB
 
-// slavePool 存放 db Slave 連線池的全域變數
-var slavePool *gorm.DB
+func DBConn() (*gorm.DB, errorcode.Error) {
 
-type IDber interface {
-	MasterConnect() (*gorm.DB, errorcode.Error)
-	SlaveConnect() (*gorm.DB, errorcode.Error)
-	DBPing()
-	CheckTable()
-}
-
-func NewDBConnection() IDber {
-	return &dbCon{}
-}
-
-// MasterConnect 建立 Master Pool 連線
-func (d *dbCon) MasterConnect() (*gorm.DB, errorcode.Error) {
 	var err error
 
-	if masterPool != nil {
-		if global.Config.DB.Debug {
-			return masterPool.Debug(), nil
-		}
-		return masterPool, nil
-	}
+	dsnMaster := composeString(global.DBMaster)
+	dsnSlave := composeString(global.DBSlaver)
 
-	connString := d.composeString(global.DBMaster)
-	masterPool, err = gorm.Open(mysql.Open(connString), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
-	if err != nil {
-		apiErr := helper.ErrorHandle(global.FatalLog, errorcode.Code.DBConnectError, err.Error())
-
-		return nil, apiErr
-	}
-
-	sqlPool, _ := masterPool.DB()
-
-	// 限制最大開啟的連線數
-	sqlPool.SetMaxIdleConns(100)
-	// 限制最大閒置連線數
-	sqlPool.SetMaxOpenConns(2000)
-	// 空閒連線 timeout 時間
-	sqlPool.SetConnMaxLifetime(15 * time.Second)
-
-	if global.Config.DB.Debug {
-		return masterPool.Debug(), nil
-	}
-	return masterPool, nil
-}
-
-// SlaveConnect 建立 Slave Pool 連線
-func (d *dbCon) SlaveConnect() (*gorm.DB, errorcode.Error) {
-	var err error
-
-	if slavePool != nil {
-		if global.Config.DB.Debug {
-			return slavePool.Debug(), nil
-		}
-		return slavePool, nil
-	}
-
-	connString := d.composeString(global.DBSlaver)
-	slavePool, err = gorm.Open(mysql.Open(connString), &gorm.Config{})
+	// 連接gorm
+	DB, err = gorm.Open(mysql.Open(dsnMaster), &gorm.Config{})
 	if err != nil {
 		apiErr := helper.ErrorHandle(global.FatalLog, errorcode.Code.DBConnectError, err.Error())
 		return nil, apiErr
 	}
 
-	sqlPool, _ := slavePool.DB()
+	_ = DB.Use(
+		dbresolver.Register(dbresolver.Config{
+			Sources:  []gorm.Dialector{mysql.Open(dsnMaster)},
+			Replicas: []gorm.Dialector{mysql.Open(dsnSlave)},
+			Policy:   dbresolver.RandomPolicy{}}).
+			// 空閒連線 timeout 時間
+			SetConnMaxIdleTime(15 * time.Second).
+			// 空閒連線 timeout 時間
+			SetConnMaxLifetime(15 * time.Second).
+			// 限制最大閒置連線數
+			SetMaxIdleConns(100).
+			// 限制最大開啟的連線數
+			SetMaxOpenConns(2000),
+	)
 
-	// 限制最大開啟的連線數
-	sqlPool.SetMaxIdleConns(100)
+	sqlDB, _ := DB.DB()
+
 	// 限制最大閒置連線數
-	sqlPool.SetMaxOpenConns(2000)
+	sqlDB.SetMaxIdleConns(100)
+	// 限制最大開啟的連線數
+	sqlDB.SetMaxOpenConns(2000)
 	// 空閒連線 timeout 時間
-	sqlPool.SetConnMaxLifetime(15 * time.Second)
+	sqlDB.SetConnMaxLifetime(15 * time.Second)
 
 	if global.Config.DB.Debug {
-		return slavePool.Debug(), nil
+		DB = DB.Debug()
 	}
-	return slavePool, nil
+
+	return DB, nil
 }
 
 // DBPing 檢查DB是否啟動
-func (d *dbCon) DBPing() {
+func DBPing() {
 	// 檢查 master db
-	masterPool, apiErr := d.MasterConnect()
+	dbCon, apiErr := DBConn()
 	if apiErr != nil {
 		log.Fatalf("🔔🔔🔔 MASTER DB CONNECT ERROR: %v 🔔🔔🔔", global.Config.DBMaster.Host)
 	}
 
-	masterDB, err := masterPool.DB()
+	masterDB, err := dbCon.DB()
 	if err != nil {
 		log.Fatalf("🔔🔔🔔 CONNECT MASTER DB ERROR: %v 🔔🔔🔔", err.Error())
 	}
+
 	err = masterDB.Ping()
 	if err != nil {
 		log.Fatalf("🔔🔔🔔 PING MASTER DB ERROR: %v 🔔🔔🔔", err.Error())
 	}
 
-	// 檢查 slave db
-	slavePool, apiErr := d.SlaveConnect()
-	if apiErr != nil {
-		log.Fatalf("🔔🔔🔔 SLAVE DB CONNECT ERROR: %v 🔔🔔🔔", global.Config.DBSlave.Host)
-	}
-	slaveDB, err := slavePool.DB()
-	if err != nil {
-		log.Fatalf("🔔🔔🔔 CONNECT SLAVE DB ERROR: %v 🔔🔔🔔", err.Error())
-	}
-	err = slaveDB.Ping()
-	if err != nil {
-		log.Fatalf("🔔🔔🔔 PING SLAVE DB ERROR: %v 🔔🔔🔔", err.Error())
-	}
 }
 
 // CheckTable 啟動main.go服務時，直接檢查所有 DB 的 Table 是否已經存在
-func (d *dbCon) CheckTable() {
-	db, apiErr := d.MasterConnect()
+func CheckTable() {
+	db, apiErr := DBConn()
 	if apiErr != nil {
 		log.Fatalf("🔔🔔🔔 MASTER DB CONNECT ERROR: %v 🔔🔔🔔", global.Config.DBMaster.Host)
 	}
@@ -161,27 +112,27 @@ func (d *dbCon) CheckTable() {
 }
 
 // composeString 組合DB連線前的字串資料
-func (d *dbCon) composeString(mode string) string {
+func composeString(mode string) string {
 	db := dbCon{}
 
 	switch mode {
 	case global.DBMaster:
-		db.Host = d.getHost(true)
-		db.Username = d.getUser(true)
-		db.Password = d.getPass(true)
-		db.Database = d.getDBName()
+		db.Host = getHost(true)
+		db.Username = getUser(true)
+		db.Password = getPass(true)
+		db.Database = getDBName()
 	case global.DBSlaver:
-		db.Host = d.getHost(false)
-		db.Username = d.getUser(false)
-		db.Password = d.getPass(false)
-		db.Database = d.getDBName()
+		db.Host = getHost(false)
+		db.Username = getUser(false)
+		db.Password = getPass(false)
+		db.Database = getDBName()
 	}
 
 	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?timeout=5s&charset=utf8mb4&parseTime=True&loc=Local", db.Username, db.Password, db.Host, db.Database)
 }
 
 // getHost 取 DB Host
-func (d *dbCon) getHost(master bool) string {
+func getHost(master bool) string {
 
 	switch master {
 	case true:
@@ -198,7 +149,7 @@ func (d *dbCon) getHost(master bool) string {
 }
 
 // getUser 取 DB User
-func (d *dbCon) getUser(master bool) string {
+func getUser(master bool) string {
 
 	switch master {
 	case true:
@@ -215,7 +166,7 @@ func (d *dbCon) getUser(master bool) string {
 }
 
 // getPass 取 DB Pass
-func (d *dbCon) getPass(master bool) string {
+func getPass(master bool) string {
 
 	switch master {
 	case true:
@@ -232,7 +183,7 @@ func (d *dbCon) getPass(master bool) string {
 }
 
 // getDBName 取 DB Name
-func (d *dbCon) getDBName() string {
+func getDBName() string {
 
 	if value, ok := os.LookupEnv("DB_NAME"); ok {
 		return value
