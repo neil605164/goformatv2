@@ -77,7 +77,7 @@ func (c *CronJob) Wait() {
 // Exec 開始執行背景
 func (c *CronJob) Exec() (apiErr errorcode.Error) {
 	if c.FuncName == nil {
-		_ = helper.ErrorHandle(global.WarnLog, "FUNC_NOT_EXIST", c.FuncName)
+		_ = helper.ErrorHandle(global.WarnLog, errorcode.Code.CronJobFuncNotExist, c.FuncName)
 	}
 
 	return c.FuncName()
@@ -95,10 +95,10 @@ func (c *CronJob) RecordJobStatus(job *CronJob, startTime, endTime time.Time, ap
 	execTime := endTime.Sub(startTime)
 	if apiErr != nil {
 		msg = fmt.Sprintf("%v error, error reason %v , and totally spent %v", c.Name, apiErr.Error(), execTime)
-		_ = helper.ErrorHandle(global.WarnLog, "CRON_JOB_ERROR", msg)
+		_ = helper.ErrorHandle(global.WarnLog, errorcode.Code.CronJobError, msg)
 		return
 	}
 
 	msg = fmt.Sprintf("%v execute success, and totally spent %v", c.Name, execTime)
-	_ = helper.ErrorHandle(global.SuccessLog, "CRON_JOB_SUCCESS_EXECUTE", msg)
+	_ = helper.ErrorHandle(global.SuccessLog, errorcode.Code.CronJobSuccessExecute, msg)
 }

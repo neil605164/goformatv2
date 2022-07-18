@@ -3,6 +3,7 @@ package schedule
 import (
 	"fmt"
 	"goformatv2/app/global"
+	"goformatv2/app/global/errorcode"
 	"goformatv2/app/global/helper"
 	"goformatv2/internal/bootstrap"
 	"os"
@@ -23,7 +24,7 @@ func Run() {
 		job.Init()
 		pid, err := bg.AddJob(job.Spec, cron.NewChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)).Then(job))
 		if err != nil {
-			_ = helper.ErrorHandle(global.WarnLog, "CRON_JOB_ERROR", err)
+			_ = helper.ErrorHandle(global.WarnLog, errorcode.Code.CronJobError, err)
 		}
 
 		// 設定 pid
@@ -31,12 +32,12 @@ func Run() {
 	}
 
 	// 開始排程
-	_ = helper.ErrorHandle(global.SuccessLog, "CRON_JOB_START", "🔔 crontanb success start 🔔")
+	_ = helper.ErrorHandle(global.SuccessLog, errorcode.Code.CronJobStart, "🔔 crontanb success start 🔔")
 	bg.Start()
 
 	// 等待結束訊號
 	<-bootstrap.GracefulDown()
-	_ = helper.ErrorHandle(global.WarnLog, "CRON_JOB_PREPARE_STOP", "🚦  排程收到訊號囉，等待其他背景完成，準備結束排程 🚦")
+	_ = helper.ErrorHandle(global.WarnLog, errorcode.Code.CronJobPrepareStop, "🚦  排程收到訊號囉，等待其他背景完成，準備結束排程 🚦")
 
 	// 停止排程
 	bg.Stop()
@@ -53,7 +54,7 @@ func Run() {
 			job.Wait()
 		}
 
-		_ = helper.ErrorHandle(global.SuccessLog, "CRON_JOB_STOP", "🚦  收到關閉訊號，強制結束 🚦")
+		_ = helper.ErrorHandle(global.SuccessLog, errorcode.Code.CronJobStop, "🚦  收到關閉訊號，強制結束 🚦")
 		os.Exit(2)
 	}
 

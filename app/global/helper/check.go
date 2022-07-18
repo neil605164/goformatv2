@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"goformatv2/app/global"
 	"goformatv2/app/global/errorcode"
 
@@ -15,23 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/go-playground/validator.v9"
 )
-
-// CheckDirIsExist 檢查檔案路徑是否存在
-func CheckDirIsExist(filePath string, perm os.FileMode) (apiErr errorcode.Error) {
-	// 重新設置 umask
-	// syscall.Umask(0)
-
-	// 檢查檔案路徑是否存在
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		// 建制資料夾
-		if err := os.MkdirAll(filePath, perm); err != nil {
-			apiErr = ErrorHandle(global.FatalLog, "CREATE_DIR_ERROR", err.Error())
-			return
-		}
-	}
-
-	return
-}
 
 // CheckFileIsExist 檢查檔案 + 路徑是否存在
 func CheckFileIsExist(filePath, fileName string, perm os.FileMode) error {
@@ -87,7 +69,7 @@ func InArray(val string, array []string) (exists bool) {
 func CatchError(c *gin.Context) {
 	if err := recover(); err != nil {
 		// 回傳不可預期的錯誤
-		apiErr := ErrorHandle(global.FatalLog, fmt.Sprintf("%v", err), "")
+		apiErr := ErrorHandle(global.FatalLog, errorcode.Code.UnExpectedError, err)
 		c.JSON(http.StatusBadRequest, Fail(apiErr))
 	}
 }

@@ -55,7 +55,7 @@ func (d *dbCon) MasterConnect() (*gorm.DB, errorcode.Error) {
 	connString := d.composeString(global.DBMaster)
 	masterPool, err = gorm.Open(mysql.Open(connString), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
 	if err != nil {
-		apiErr := helper.ErrorHandle(global.FatalLog, "DB_CONNECT_ERROR", err.Error())
+		apiErr := helper.ErrorHandle(global.FatalLog, errorcode.Code.DBConnectError, err.Error())
 
 		return nil, apiErr
 	}
@@ -89,7 +89,7 @@ func (d *dbCon) SlaveConnect() (*gorm.DB, errorcode.Error) {
 	connString := d.composeString(global.DBSlaver)
 	slavePool, err = gorm.Open(mysql.Open(connString), &gorm.Config{})
 	if err != nil {
-		apiErr := helper.ErrorHandle(global.FatalLog, "DB_CONNECT_ERROR", err.Error())
+		apiErr := helper.ErrorHandle(global.FatalLog, errorcode.Code.DBConnectError, err.Error())
 		return nil, apiErr
 	}
 
@@ -154,7 +154,7 @@ func (d *dbCon) CheckTable() {
 	}
 
 	if err != nil {
-		_ = helper.ErrorHandle(global.FatalLog, "DB_TABLE_NOT_EXIST", fmt.Sprintf("❌ 設置DB錯誤： %v ❌", err.Error()))
+		_ = helper.ErrorHandle(global.FatalLog, errorcode.Code.DBTableNotExist, fmt.Sprintf("❌ 設置DB錯誤： %v ❌", err.Error()))
 		log.Fatalf("🔔🔔🔔 MIGRATE MASTER TABLE ERROR: %v 🔔🔔🔔", err.Error())
 	}
 

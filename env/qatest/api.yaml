@@ -1,3 +1,0 @@
-api:
-  pitaya_grpc_server: qa-pitaya-grpc-service.rd3-qa-pitaya:50051
-  lemon_grpc_server: qa-lemon-grpc-service.rd3-qa-lemon:50051

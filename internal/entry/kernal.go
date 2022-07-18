@@ -3,6 +3,7 @@ package entry
 import (
 	"fmt"
 	"goformatv2/app/global"
+	"goformatv2/app/global/errorcode"
 	"goformatv2/app/global/helper"
 	"goformatv2/internal/bootstrap"
 	"goformatv2/internal/schedule"
@@ -34,7 +35,7 @@ func Run() {
 		go schedule.Run()
 		server.Run()
 	default:
-		_ = helper.ErrorHandle(global.FatalLog, fmt.Sprintf("[❌ Fatal❌ ] SERVICE IS NOT EXIST: %v", service), "")
+		_ = helper.ErrorHandle(global.FatalLog, errorcode.Code.ServiceIsNotExist, "")
 		fmt.Println("[❌ Fatal❌ ] SERVICE IS NOT EXIST: ", service)
 	}
 }

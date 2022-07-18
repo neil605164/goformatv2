@@ -48,28 +48,19 @@ const (
 
 /** 檔案權限管理 **/
 const (
-	DirPermission  = 0755 // 資料夾權限
-	FilePermission = 0644 // 檔案權限
+	DirPermission  = 0o755 // 資料夾權限
+	FilePermission = 0o644 // 檔案權限
 )
 
 /** Redis Key **/
 const (
-	TeamPlus = "Coconut:TeamPlus"
+	TeamPlus = "Redis:TeamPlus"
 )
 
-/** Teamplus 資訊 **/
+/** Log 相關用 **/
 const (
-	TeamPlusURL     = "https://cqgame.info"                  // team+ 網址
-	TeamPlusAccount = "rd3bot"                               // 機器人帳號
-	TeamPlusAPIKey  = "AAE4BFA1-3238-09A3-7964-898C4E985D2A" // 機器人 api key
-	TeamPlusChatSn  = "1313"                                 // 群組房號
-)
-
-/** 單位 **/
-const (
-	RD3     = "RD3"
-	RD1     = "RD1"
-	Cypress = "Cypress"
+	LogPath    = "./storage/logs/" // Log 存放位置
+	FileSuffix = ".log"            // log 副檔名
 )
 
 /** 錯誤訊息 **/

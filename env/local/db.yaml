@@ -12,6 +12,6 @@ slave:
   password: root
   database: goformatv2
 redis:
-  redis_host: redis_goformatv2
-  redis_port: 6379
-  redis_password: ""
+  redisHost: redis_goformatv2
+  redisPort: 6379
+  redisPassword: ""

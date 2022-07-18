@@ -40,11 +40,15 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect

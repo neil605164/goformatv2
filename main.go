@@ -12,6 +12,7 @@ import (
 	_ "goformatv2/docs"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 //go:embed env/*
@@ -22,6 +23,9 @@ func init() {
 
 	// 載入環境設定，所有動作須在該func後執行
 	global.Start(f)
+
+	// 設定 log 格式
+	helper.SetFormatter(&logrus.JSONFormatter{})
 
 	// 檢查 DB 機器服務
 	db := database.NewDBConnection()
@@ -34,7 +38,7 @@ func init() {
 
 	// 檢查 Redis 機器服務
 	redis := cache.RedisIns()
-	redis.Ping()
+	_ = redis.Ping()
 
 	// 設定程式碼 timezone
 	os.Setenv("TZ", "America/Puerto_Rico")

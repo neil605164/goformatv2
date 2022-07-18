@@ -37,7 +37,7 @@ func HashPassword(password string) (value string, apiErr errorcode.Error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 
 	if err != nil {
-		apiErr = ErrorHandle(global.WarnLog, "CRYPTION_ERROR", err.Error())
+		apiErr = ErrorHandle(global.WarnLog, errorcode.Code.CryptionError, err.Error())
 		return string(bytes), apiErr
 	}
 

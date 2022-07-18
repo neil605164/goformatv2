@@ -1,3 +1,0 @@
-api:
-  pitaya_grpc_server: pro-pitaya-grpc-service.rd3-pro-pitaya:50051
-  lemon_grpc_server: pro-lemon-grpc-service.rd3-pro-lemon:50051

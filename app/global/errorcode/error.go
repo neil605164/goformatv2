@@ -11,7 +11,7 @@ type Error interface {
 	GetErrorText() string
 	GetLogID() string
 	SetLogID(logID string)
-	SetErrorCode(code string)
+	SetErrorCode(code NewErrorCode)
 }
 
 // newError API錯誤格式
@@ -32,18 +32,10 @@ func (e *newError) SetLogID(logID string) {
 }
 
 // SetErrorCode 設定 errorcode
-func (e *newError) SetErrorCode(code string) {
-
-	api, ok := errorCode[code]
-	if !ok {
-		e.ErrorCode = 9999
-		e.ErrorMsg = fmt.Sprintf("Undefined Error (%s)", code)
-		e.LogILogIDentity = ""
-	} else {
-		e.ErrorCode = api.ErrorCode
-		e.ErrorMsg = fmt.Sprintf(api.ErrorMsg+"(%d)", api.ErrorCode)
-		e.LogILogIDentity = ""
-	}
+func (e *newError) SetErrorCode(code NewErrorCode) {
+	e.ErrorCode = code.ErrorCode
+	e.ErrorMsg = code.ErrorMsg
+	e.LogILogIDentity = ""
 }
 
 // GetErrorCode 錯誤代碼
