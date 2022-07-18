@@ -1,0 +1,12 @@
+log:
+  log_dir: /app/log/
+  access_log: access.log
+  error_log: error.log
+
+grpc_setting:
+  code: goformat
+  name: Go基底
+  path: pro-goformat-service.rd3-pro-goformat
+
+db:
+  debug: false

@@ -1,0 +1,4 @@
+api:
+  pitaya_grpc_server: pitaya:50051
+  lemon_grpc_server: lemon:50051
+

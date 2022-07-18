@@ -1,0 +1,17 @@
+master:
+  # master db 設定
+  host: mysql_goformatv2
+  username: root
+  password: root
+  database: goformatv2
+
+slave:
+  # slave db 設定
+  host: mysql_goformatv2
+  username: root
+  password: root
+  database: goformatv2
+redis:
+  redis_host: redis_goformatv2
+  redis_port: 6379
+  redis_password: ""
