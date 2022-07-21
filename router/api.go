@@ -1,17 +1,15 @@
 package router
 
 import (
-	"goformatv2/app/global/helper"
 	"goformatv2/app/handler/pprof"
+	"goformatv2/app/handler/userh"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
-
+	// gin-swagger middleware
 	// swagger embed files
-	swaggerfiles "github.com/swaggo/files"
 )
 
 // LoadBackendRouter 路由控制
@@ -31,10 +29,9 @@ func LoadBackendRouter(r *gin.Engine) {
 		c.JSON(http.StatusOK, data)
 	})
 
-	// 載入測試用API
-	if helper.IsDeveloperEnv() {
-		// Swagger
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	users := api.Group("/users")
+	{
+		users.GET("/admin-list", userh.UserList)
 	}
 
 }

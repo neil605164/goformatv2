@@ -13,7 +13,7 @@ type notify struct {
 }
 
 var singleton *notify
-var Once sync.Once
+var once sync.Once
 
 type INotifier interface {
 	HandleServiceError(org, url string, header map[string]string, params, resp interface{})
@@ -21,9 +21,9 @@ type INotifier interface {
 
 // NewNotify Implement NewNotify
 func NewNotify() INotifier {
-	Once.Do(func() {
+	once.Do(func() {
 		singleton = &notify{
-			redisRepo: cache.RedisIns(),
+			redisRepo: cache.Instance(),
 		}
 	})
 	return singleton

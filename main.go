@@ -27,15 +27,15 @@ func init() {
 	helper.SetFormatter(&logrus.JSONFormatter{})
 
 	// 檢查 DB 機器服務
-	database.DBPing()
+	database.Instance().DBPing()
 
 	// 自動建置 DB + Table
-	if helper.IsLocal() {
-		database.CheckTable()
-	}
+	// if helper.IsLocal() {
+	// 	dbConn.CheckTable()
+	// }
 
 	// 檢查 Redis 機器服務
-	_ = cache.Ping()
+	_ = cache.Instance().Ping()
 
 	// 設定程式碼 timezone
 	// os.Setenv("TZ", "America/Puerto_Rico")

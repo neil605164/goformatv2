@@ -2,7 +2,8 @@ package global
 
 import (
 	"embed"
-	"goformatv2/app/global/structs"
+	"goformatv2/app/global/structer"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // Config 讀取dev.yaml檔案
-var Config *structs.EnvConfig
+var Config *structer.EnvConfig
 
 // Lang 各語系
 var Lang = []string{"en", "tw", "cn"}
@@ -33,7 +34,8 @@ func Start(f embed.FS) {
 	}
 
 	for k := range envPathList {
-		configFile, err := f.ReadFile(envPathList[k])
+		configFile, err := ioutil.ReadFile(envPathList[k])
+		// configFile, err := f.ReadFile(envPathList[k])
 		if err != nil {
 			log.Fatalf("🔔🔔🔔  Can not find Yaml file %v 🔔🔔🔔", err)
 		}

@@ -28,10 +28,11 @@ type Errorcode struct {
 	GetTimeZoneError       NewErrorCode
 	ParseTimeError         NewErrorCode
 	CryptionError          NewErrorCode
+	GetUserListError       NewErrorCode
 }
 
 var Code = Errorcode{
-	Success:                NewErrorCode{1, "Success"},                      // 呼叫API成功
+	Success:                NewErrorCode{0, "Success"},                      // 呼叫API成功
 	UnExpectedError:        NewErrorCode{400, "UnExpected Error"},           // 不預期的錯誤
 	PermissionDenied:       NewErrorCode{403, "Permission Denied"},          // 權限不足
 	ServiceIsNotExist:      NewErrorCode{1000, "Service Is Not Exist"},      // 服務不存在
@@ -52,4 +53,7 @@ var Code = Errorcode{
 	GetTimeZoneError:       NewErrorCode{1015, "Get Time Zone Error"},       // 取時區錯誤
 	ParseTimeError:         NewErrorCode{1016, "Parse Time Error"},          // 時間轉換錯誤
 	CryptionError:          NewErrorCode{1017, "Cryption Error"},            // 加密錯誤
+
+	// 2000 會員錯誤代碼
+	GetUserListError: NewErrorCode{2000, "Get User List Error"}, // 取會員清單錯誤
 }

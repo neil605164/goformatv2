@@ -5,9 +5,10 @@ import (
 	"goformatv2/app/global"
 	"goformatv2/app/global/errorcode"
 	"goformatv2/app/global/helper"
-	"goformatv2/app/model"
+	"goformatv2/app/models"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"gorm.io/plugin/dbresolver"
@@ -16,17 +17,36 @@ import (
 	"gorm.io/gorm"
 )
 
-// dbCon DB連線資料
-type dbCon struct {
-	Host     string `json:"host"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Database string `json:"database"`
+type IMySQL interface {
+	DBConn() (*gorm.DB, errorcode.Error)
+	DBPing()
+	CheckTable()
 }
 
-var DB *gorm.DB
+// MySQL DB連線資料
+type MySQL struct {
+	host     string `tag:"DB host"`
+	username string `tag:"DB username"`
+	password string `tag:"DB password"`
+	database string `tag:"DB database"`
+}
 
-func DBConn() (*gorm.DB, errorcode.Error) {
+var singleton *MySQL
+var once sync.Once
+var dbCon *gorm.DB
+
+func Instance() IMySQL {
+	once.Do(func() {
+		singleton = &MySQL{}
+	})
+	return singleton
+}
+
+func (m *MySQL) DBConn() (*gorm.DB, errorcode.Error) {
+
+	if dbCon != nil {
+		return dbCon, nil
+	}
 
 	var err error
 
@@ -34,13 +54,13 @@ func DBConn() (*gorm.DB, errorcode.Error) {
 	dsnSlave := composeString(global.DBSlaver)
 
 	// 連接gorm
-	DB, err = gorm.Open(mysql.Open(dsnMaster), &gorm.Config{})
+	dbCon, err = gorm.Open(mysql.Open(dsnMaster), &gorm.Config{})
 	if err != nil {
 		apiErr := helper.ErrorHandle(global.FatalLog, errorcode.Code.DBConnectError, err.Error())
 		return nil, apiErr
 	}
 
-	_ = DB.Use(
+	_ = dbCon.Use(
 		dbresolver.Register(dbresolver.Config{
 			Sources:  []gorm.Dialector{mysql.Open(dsnMaster)},
 			Replicas: []gorm.Dialector{mysql.Open(dsnSlave)},
@@ -55,7 +75,7 @@ func DBConn() (*gorm.DB, errorcode.Error) {
 			SetMaxOpenConns(2000),
 	)
 
-	sqlDB, _ := DB.DB()
+	sqlDB, _ := dbCon.DB()
 
 	// 限制最大閒置連線數
 	sqlDB.SetMaxIdleConns(100)
@@ -65,16 +85,16 @@ func DBConn() (*gorm.DB, errorcode.Error) {
 	sqlDB.SetConnMaxLifetime(15 * time.Second)
 
 	if global.Config.DB.Debug {
-		DB = DB.Debug()
+		dbCon = dbCon.Debug()
 	}
 
-	return DB, nil
+	return dbCon, nil
 }
 
 // DBPing 檢查DB是否啟動
-func DBPing() {
+func (m *MySQL) DBPing() {
 	// 檢查 master db
-	dbCon, apiErr := DBConn()
+	dbCon, apiErr := m.DBConn()
 	if apiErr != nil {
 		log.Fatalf("🔔🔔🔔 MASTER DB CONNECT ERROR: %v 🔔🔔🔔", global.Config.DBMaster.Host)
 	}
@@ -92,14 +112,19 @@ func DBPing() {
 }
 
 // CheckTable 啟動main.go服務時，直接檢查所有 DB 的 Table 是否已經存在
-func CheckTable() {
-	db, apiErr := DBConn()
+func (m *MySQL) CheckTable() {
+	db, apiErr := m.DBConn()
 	if apiErr != nil {
 		log.Fatalf("🔔🔔🔔 MASTER DB CONNECT ERROR: %v 🔔🔔🔔", global.Config.DBMaster.Host)
 	}
 
 	// 會自動建置 DB Table
-	err := db.Set("gorm:table_options", "comment '細單規則'").AutoMigrate(&model.Admin{})
+	err := db.Set("gorm:table_options", "comment '使用者資訊'").AutoMigrate(&models.User{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	err = db.Set("gorm:table_options", "comment '使用者審查資訊'").AutoMigrate(&models.UserReview{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -113,25 +138,25 @@ func CheckTable() {
 
 // composeString 組合DB連線前的字串資料
 func composeString(mode string) string {
-	db := dbCon{}
+	db := MySQL{}
 
 	switch mode {
 	case global.DBMaster:
-		db.Host = getHost(true)
-		db.Username = getUser(true)
-		db.Password = getPass(true)
-		db.Database = getDBName()
+		db.host = getHost(true)
+		db.username = getUser(true)
+		db.password = getPass(true)
+		db.database = getDBName()
 	case global.DBSlaver:
-		db.Host = getHost(false)
-		db.Username = getUser(false)
-		db.Password = getPass(false)
-		db.Database = getDBName()
+		db.host = getHost(false)
+		db.username = getUser(false)
+		db.password = getPass(false)
+		db.database = getDBName()
 	}
 
-	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?timeout=5s&charset=utf8mb4&parseTime=True&loc=Local", db.Username, db.Password, db.Host, db.Database)
+	return fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?timeout=5s&charset=utf8mb4&parseTime=True&loc=Local", db.username, db.password, db.host, db.database)
 }
 
-// getHost 取 DB Host
+// getHost 取 DB host
 func getHost(master bool) string {
 
 	switch master {

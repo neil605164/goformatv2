@@ -1,4 +1,4 @@
-package structs
+package structer
 
 // EnvConfig dev.yaml格式
 type EnvConfig struct {

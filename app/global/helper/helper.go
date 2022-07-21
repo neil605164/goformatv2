@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 	"goformatv2/app/global"
 	"goformatv2/app/global/errorcode"
-	"goformatv2/app/global/structs"
+	"goformatv2/app/global/structer"
 	"time"
 )
 
 // Success 回傳成功API
-func Success(result interface{}) *structs.APIResult {
-	res := &structs.APIResult{
+func Success(result interface{}) *structer.APIResult {
+	res := &structer.APIResult{
 		Result: result,
-		Status: structs.RespStatus{
-			ErrorCode:   1,
+		Status: structer.RespStatus{
+			ErrorCode:   0,
 			ErrorMsg:    "SUCCESS",
-			Datetime:    time.Now().String(),
+			Datetime:    time.Now().Format(time.RFC3339),
 			LogIDentity: "",
 		},
 	}
@@ -24,9 +24,9 @@ func Success(result interface{}) *structs.APIResult {
 }
 
 // Fail 回傳失敗API
-func Fail(err errorcode.Error) *structs.APIResult {
-	res := &structs.APIResult{}
-	status := structs.RespStatus{}
+func Fail(err errorcode.Error) *structer.APIResult {
+	res := &structer.APIResult{}
+	status := structer.RespStatus{}
 
 	status.ErrorCode = err.GetErrorCode()
 	status.ErrorMsg = err.GetErrorText()
