@@ -41,6 +41,12 @@ func init() {
 	// os.Setenv("TZ", "America/Puerto_Rico")
 }
 
+// @title GoFormatV2 Demo
+// @version 1.0
+// @description     This is a sample server celler server.
+// @host      localhost:9999
+// @BasePath  /api/v1
+// @securityDefinitions.basic  BasicAuth
 func main() {
 	entry.Run()
 }

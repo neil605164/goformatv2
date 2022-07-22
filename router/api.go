@@ -15,9 +15,9 @@ import (
 // LoadBackendRouter 路由控制
 func LoadBackendRouter(r *gin.Engine) {
 
-	pprof.Register(r, "/internal/debug/pprof/") // 性能
+	pprof.Register(r, "/api/v1/internal/debug/pprof/") // 性能
 
-	api := r.Group("/api")
+	api := r.Group("/api/v1")
 
 	// K8S Health Check
 	api.GET("/healthz", func(c *gin.Context) {
@@ -31,7 +31,8 @@ func LoadBackendRouter(r *gin.Engine) {
 
 	users := api.Group("/users")
 	{
-		users.GET("/admin-list", userh.UserList)
+		users.GET("/list", userh.UserList)
+		users.POST("/create", userh.CreateUser)
 	}
 
 }

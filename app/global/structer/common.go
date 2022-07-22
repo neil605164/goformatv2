@@ -43,8 +43,8 @@ type APIResult struct {
 }
 
 type RespStatus struct {
-	ErrorCode   int    `json:"errorCode"`
-	ErrorMsg    string `json:"errorMsg"`
-	Datetime    string `json:"datetime"`
-	LogIDentity string `json:"logID"`
+	ErrorCode   int    `json:"errorCode" example:"1000"`
+	ErrorMsg    string `json:"errorMsg" example:"error message"`
+	Datetime    string `json:"datetime" example:"2022-07-21T12:19:39-04:00"`
+	LogIDentity string `json:"logID" example:"qw13er65tyui74rg22o"`
 }

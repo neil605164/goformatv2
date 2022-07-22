@@ -18,7 +18,7 @@ func RouteProvider(r *gin.Engine) {
 	if helper.IsDeveloperEnv() {
 		r.Use(middleware.WriteLog)
 		// Swagger
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+		r.GET("/api/v1/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
 	// api route
