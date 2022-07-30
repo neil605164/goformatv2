@@ -2,6 +2,7 @@ package userr
 
 import (
 	"goformatv2/app/global/errorcode"
+	"goformatv2/app/global/structer"
 	"goformatv2/app/models"
 	"goformatv2/internal/database"
 	"sync"
@@ -9,6 +10,7 @@ import (
 
 type Interface interface {
 	UserList() (data []models.User, apiErr errorcode.Error)
+	CreateUser(raw *structer.CreateReq) (apiErr errorcode.Error)
 }
 
 var singleton *repo

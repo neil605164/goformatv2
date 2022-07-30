@@ -28,7 +28,11 @@ type Errorcode struct {
 	GetTimeZoneError       NewErrorCode
 	ParseTimeError         NewErrorCode
 	CryptionError          NewErrorCode
+	BindParamError         NewErrorCode
+	ValidateParamError     NewErrorCode
 	GetUserListError       NewErrorCode
+	CreateUserFail         NewErrorCode
+	UpdateUserFail         NewErrorCode
 }
 
 var Code = Errorcode{
@@ -53,7 +57,11 @@ var Code = Errorcode{
 	GetTimeZoneError:       NewErrorCode{1015, "Get Time Zone Error"},       // 取時區錯誤
 	ParseTimeError:         NewErrorCode{1016, "Parse Time Error"},          // 時間轉換錯誤
 	CryptionError:          NewErrorCode{1017, "Cryption Error"},            // 加密錯誤
+	BindParamError:         NewErrorCode{1018, "Bind Param Error"},          // 取參數錯誤
+	ValidateParamError:     NewErrorCode{1019, "ValidateParamError"},        // 驗證參數錯誤
 
 	// 2000 會員錯誤代碼
 	GetUserListError: NewErrorCode{2000, "Get User List Error"}, // 取會員清單錯誤
+	CreateUserFail:   NewErrorCode{2001, "Create User Fail"},    // 建立會員失敗
+	UpdateUserFail:   NewErrorCode{2002, "Update User Fail"},    // 更新會員失敗
 }

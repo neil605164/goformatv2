@@ -31,8 +31,8 @@ func LoadBackendRouter(r *gin.Engine) {
 
 	users := api.Group("/users")
 	{
-		users.GET("/list", userh.UserList)
-		users.POST("/create", userh.CreateUser)
+		users.GET("/", userh.UserList)
+		users.POST("/", userh.CreateUser)
 	}
 
 }

@@ -12,6 +12,7 @@ var once sync.Once
 
 type IUser interface {
 	UserList() ([]structer.UserList, errorcode.Error)
+	CreateUser(raw *structer.CreateReq) (apiErr errorcode.Error)
 }
 
 type business struct {

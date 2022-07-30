@@ -1,5 +1,7 @@
 package structer
 
+import "time"
+
 // EnvConfig dev.yaml格式
 type EnvConfig struct {
 	DBMaster DBMaster `yaml:"master"`
@@ -43,8 +45,8 @@ type APIResult struct {
 }
 
 type RespStatus struct {
-	ErrorCode   int    `json:"errorCode" example:"1000"`
-	ErrorMsg    string `json:"errorMsg" example:"error message"`
-	Datetime    string `json:"datetime" example:"2022-07-21T12:19:39-04:00"`
-	LogIDentity string `json:"logID" example:"qw13er65tyui74rg22o"`
+	ErrorCode   int       `json:"errorCode" example:"1000"`
+	ErrorMsg    string    `json:"errorMsg" example:"error message"`
+	Datetime    time.Time `json:"datetime" example:"2022-07-21T12:19:39-04:00"`
+	LogIDentity string    `json:"logID" example:"qw13er65tyui74rg22o"`
 }

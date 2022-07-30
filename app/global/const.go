@@ -68,3 +68,18 @@ const (
 	RecordNotFound = "record not found"
 	RedisNotFound  = "redigo: nil returned"
 )
+
+/** 審查狀態 **/
+const (
+	NotVerify  = "Not Verify"  // 未驗證
+	Verifying  = "Verifying"   // 驗證中
+	Verified   = "Verified"    // 驗證通過
+	VerifyFail = "Verify Fail" // 驗證失敗
+)
+
+const LetterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+	LetterIdxBits = 6                    // 6 bits to represent a letter index
+	LetterIdxMask = 1<<LetterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	LetterIdxMax  = 63 / LetterIdxBits   // # of letter indices fitting in 63 bits
+)

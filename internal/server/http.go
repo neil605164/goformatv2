@@ -18,6 +18,8 @@ import (
 
 // Run HTTP 啟動 restful 服務
 func Run() {
+	helper.SetReportCallerSkip(3)
+
 	defer func() {
 		if err := recover(); err != nil {
 			// 補上將err傳至telegram

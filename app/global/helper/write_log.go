@@ -52,7 +52,7 @@ func ErrorHandle(errorType string, errorCode errorcode.NewErrorCode, errMsg inte
 	apiErr = errorcode.NewError()
 
 	// 塞入 Error 對應清單
-	apiErr.SetErrorCode(errorcode.NewErrorCode{})
+	apiErr.SetErrorCode(errorCode)
 
 	message := fmt.Sprintf("%v: %v", errorCode.ErrorCode, errorCode.ErrorMsg)
 	if errMsg != "" {

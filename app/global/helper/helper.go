@@ -5,6 +5,7 @@ import (
 	"goformatv2/app/global"
 	"goformatv2/app/global/errorcode"
 	"goformatv2/app/global/structer"
+	"math/rand"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func Success(result interface{}) *structer.APIResult {
 		Status: structer.RespStatus{
 			ErrorCode:   0,
 			ErrorMsg:    "SUCCESS",
-			Datetime:    time.Now().Format(time.RFC3339),
+			Datetime:    time.Now(),
 			LogIDentity: "",
 		},
 	}
@@ -31,6 +32,7 @@ func Fail(err errorcode.Error) *structer.APIResult {
 	status.ErrorCode = err.GetErrorCode()
 	status.ErrorMsg = err.GetErrorText()
 	status.LogIDentity = err.GetLogID()
+	status.Datetime = time.Now()
 
 	res.Result = map[string]string{}
 	res.Status = status
@@ -81,4 +83,22 @@ func StructToMap(myStruct interface{}) (myMap map[string]interface{}, apiErr err
 	}
 
 	return
+}
+
+func RandStringBytesMaskImpr(n int) string {
+	b := make([]byte, n)
+	// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
+	for i, cache, remain := n-1, rand.Int63(), global.LetterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = rand.Int63(), global.LetterIdxMax
+		}
+		if idx := int(cache & global.LetterIdxMask); idx < len(global.LetterBytes) {
+			b[i] = global.LetterBytes[idx]
+			i--
+		}
+		cache >>= global.LetterIdxBits
+		remain--
+	}
+
+	return string(b)
 }

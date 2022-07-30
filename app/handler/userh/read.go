@@ -14,9 +14,7 @@ import (
 // @Produce      json
 // @Success      200  {object} structer.UserList
 // @Failure      400  {object} structer.APIResult "異常錯誤"
-// @Failure      404  {object} structer.APIResult "異常錯誤"
-// @Failure      500  {object} structer.APIResult "異常錯誤"
-// @Router       /users/list [get]
+// @Router       /users [get]
 func UserList(c *gin.Context) {
 
 	bus := userb.Instance()
